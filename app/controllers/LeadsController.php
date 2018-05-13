@@ -6,25 +6,24 @@ use Phalcon\Paginator\Adapter\Model as Paginator;
 
 class LeadsController extends ControllerBase
 {
-    /**
-     * Index action
-     */
-    public function indexAction()
-    {
-        $this->persistent->parameters = null;
-    }
 
     /**
-     * Searches for leads
+     *
      */
-    public function searchAction()
+    public function indexAction()
     {
         $numberPage = 1;
         if ($this->request->isPost()) {
             $query = Criteria::fromInput($this->di, 'Leads', $_POST);
             $this->persistent->parameters = $query->getParams();
-        } else {
+        }
+        else {
+          if ($this->request->getQuery("page", "int") > 1) {
             $numberPage = $this->request->getQuery("page", "int");
+          }
+          else {
+            $this->persistent->parameters = null;
+          }
         }
 
         $parameters = $this->persistent->parameters;
@@ -52,6 +51,14 @@ class LeadsController extends ControllerBase
         ]);
 
         $this->view->page = $paginator->getPaginate();
+    }
+
+    /**
+     * Searches for leads
+     */
+    public function searchAction()
+    {
+      $this->persistent->parameters = null;
     }
 
     /**
@@ -116,7 +123,13 @@ class LeadsController extends ControllerBase
         $lead->email_address = $this->request->getPost("email_address");
         $lead->phone = $this->request->getPost("phone");
         $lead->address = $this->request->getPost("address");
-        $lead->square_footage = $this->request->getPost("square_footage");
+        //make sure square footage has some value even if blank or not a number
+        if($this->request->getPost("square_footage") > 0) {
+          $lead->square_footage = $this->request->getPost("square_footage");
+        }
+        else {
+          $lead->square_footage = 0;
+        }
 
         if (!$lead->save()) {
             foreach ($lead->getMessages() as $message) {
@@ -260,6 +273,7 @@ class LeadsController extends ControllerBase
       $lead->email_address = $this->request->getPost("email_address");
       $lead->phone = $this->request->getPost("phone");
       $lead->address = $this->request->getPost("address");
+      //make sure square footage has some value even if blank or not a number
       if($this->request->getPost("square_footage") > 0) {
         $lead->square_footage = $this->request->getPost("square_footage");
       }
