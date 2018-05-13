@@ -36,6 +36,13 @@ class Leads extends \Phalcon\Mvc\Model
     /**
      *
      * @var string
+     * @Column(column="phone", type="string", length=20, nullable=true)
+     */
+    public $phone;
+
+    /**
+     *
+     * @var string
      * @Column(column="address", type="string", length=255, nullable=true)
      */
     public $address;
@@ -43,7 +50,7 @@ class Leads extends \Phalcon\Mvc\Model
     /**
      *
      * @var integer
-     * @Column(column="square_footage", type="integer", length=10, nullable=true)
+     * @Column(column="square_footage", type="integer", length=8, nullable=true)
      */
     public $square_footage;
 
@@ -53,6 +60,13 @@ class Leads extends \Phalcon\Mvc\Model
      * @Column(column="created_on", type="string", nullable=false)
      */
     public $created_on;
+
+    /**
+     *
+     * @var string
+     * @Column(column="completed_on", type="string", nullable=true)
+     */
+    public $completed_on;
 
     /**
      * Initialize method for model.
