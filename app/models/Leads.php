@@ -57,7 +57,7 @@ class Leads extends \Phalcon\Mvc\Model
     /**
      *
      * @var string
-     * @Column(column="created_on", type="string", nullable=false)
+     * @Column(column="created_on", type="string", nullable=true)
      */
     public $created_on;
 
@@ -85,6 +85,14 @@ class Leads extends \Phalcon\Mvc\Model
     public function getSource()
     {
         return 'leads';
+    }
+
+    /**
+     * Called before save
+     */
+    public function beforeCreate()
+    {
+        $this->created_on = date("Y-m-d H:i:s");
     }
 
     /**

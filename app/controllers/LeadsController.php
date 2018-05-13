@@ -92,8 +92,6 @@ class LeadsController extends ControllerBase
             $this->tag->setDefault("phone", $lead->phone);
             $this->tag->setDefault("address", $lead->address);
             $this->tag->setDefault("square_footage", $lead->square_footage);
-            $this->tag->setDefault("created_on", $lead->created_on);
-            $this->tag->setDefault("completed_on", $lead->completed_on);
             
         }
     }
@@ -113,15 +111,12 @@ class LeadsController extends ControllerBase
         }
 
         $lead = new Leads();
-        $lead->firstName = $this->request->getPost("first_name");
-        $lead->lastName = $this->request->getPost("last_name");
-        $lead->emailAddress = $this->request->getPost("email_address");
+        $lead->first_name = $this->request->getPost("first_name");
+        $lead->last_name = $this->request->getPost("last_name");
+        $lead->email_address = $this->request->getPost("email_address");
         $lead->phone = $this->request->getPost("phone");
         $lead->address = $this->request->getPost("address");
-        $lead->squareFootage = $this->request->getPost("square_footage");
-        $lead->createdOn = $this->request->getPost("created_on");
-        $lead->completedOn = $this->request->getPost("completed_on");
-        
+        $lead->square_footage = $this->request->getPost("square_footage");
 
         if (!$lead->save()) {
             foreach ($lead->getMessages() as $message) {
@@ -180,7 +175,6 @@ class LeadsController extends ControllerBase
         $lead->phone = $this->request->getPost("phone");
         $lead->address = $this->request->getPost("address");
         $lead->squareFootage = $this->request->getPost("square_footage");
-        $lead->createdOn = $this->request->getPost("created_on");
         $lead->completedOn = $this->request->getPost("completed_on");
         
 
@@ -250,32 +244,42 @@ class LeadsController extends ControllerBase
 
     public function registerAction()
     {
-      $lead = new Leads();
 
-      // Store and check for errors
-      $success = $lead->save(
-        $this->request->getPost(),
-        [
-          "firstname",
-          "lastname",
-          "email_address",
-        ]
-      );
+      if (!$this->request->isPost()) {
+        $this->dispatcher->forward([
+          'controller' => "index",
+          'action' => 'index'
+        ]);
 
-      if ($success) {
-        echo "Thanks for registering!";
-      } else {
-        echo "Sorry, the following problems were generated: ";
-
-        $messages = $user->getMessages();
-
-        foreach ($messages as $message) {
-          echo $message->getMessage(), "<br/>";
-        }
+        return;
       }
 
+      $lead = new Leads();
+      $lead->first_name = $this->request->getPost("first_name");
+      $lead->last_name = $this->request->getPost("last_name");
+      $lead->email_address = $this->request->getPost("email_address");
+      $lead->phone = $this->request->getPost("phone");
+      $lead->address = $this->request->getPost("address");
+      if($this->request->getPost("square_footage") > 0) {
+        $lead->square_footage = $this->request->getPost("square_footage");
+      }
+      else {
+        $lead->square_footage = 0;
+      }
+
+      if (!$lead->save()) {
+        foreach ($lead->getMessages() as $message) {
+          $this->flash->error($message);
+        }
+
+        return;
+      }
+
+      $this->flash->success("Thank you!");
+      $this->response->redirect('/success');
       $this->view->disable();
 
+      return;
 
     }
 
