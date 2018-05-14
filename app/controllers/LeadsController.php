@@ -80,11 +80,11 @@ class LeadsController extends ControllerBase
 
             $lead = Leads::findFirstByid($id);
             if (!$lead) {
-                $this->flash->error("lead was not found");
+                $this->flash->error("Lead was not found");
 
                 $this->dispatcher->forward([
                     'controller' => "leads",
-                    'action' => 'index'
+                    'action' => 'search'
                 ]);
 
                 return;
@@ -97,9 +97,9 @@ class LeadsController extends ControllerBase
             $this->tag->setDefault("last_name", $lead->last_name);
             $this->tag->setDefault("email_address", $lead->email_address);
             $this->tag->setDefault("phone", $lead->phone);
-            $this->tag->setDefault("address", $lead->address);
+            $this->tag->setDefault("address", str_replace('<br />',"\n",$lead->address));
             $this->tag->setDefault("square_footage", $lead->square_footage);
-            
+
         }
     }
 
@@ -122,7 +122,8 @@ class LeadsController extends ControllerBase
         $lead->last_name = $this->request->getPost("last_name");
         $lead->email_address = $this->request->getPost("email_address");
         $lead->phone = $this->request->getPost("phone");
-        $lead->address = $this->request->getPost("address");
+        $lead->address = nl2br($this->request->getPost("address"));
+        $lead->session_id = $this->getDI()->getSession()->get('user-id');
         //make sure square footage has some value even if blank or not a number
         if($this->request->getPost("square_footage") > 0) {
           $lead->square_footage = $this->request->getPost("square_footage");
@@ -144,7 +145,7 @@ class LeadsController extends ControllerBase
             return;
         }
 
-        $this->flash->success("lead was created successfully");
+        $this->flash->success("Lead was created successfully");
 
         $this->dispatcher->forward([
             'controller' => "leads",
@@ -172,7 +173,7 @@ class LeadsController extends ControllerBase
         $lead = Leads::findFirstByid($id);
 
         if (!$lead) {
-            $this->flash->error("lead does not exist " . $id);
+            $this->flash->error("Lead does not exist " . $id);
 
             $this->dispatcher->forward([
                 'controller' => "leads",
@@ -184,12 +185,10 @@ class LeadsController extends ControllerBase
 
         $lead->firstName = $this->request->getPost("first_name");
         $lead->lastName = $this->request->getPost("last_name");
-        $lead->emailAddress = $this->request->getPost("email_address");
+        $lead->email_address = $this->request->getPost("email_address");
         $lead->phone = $this->request->getPost("phone");
         $lead->address = $this->request->getPost("address");
-        $lead->squareFootage = $this->request->getPost("square_footage");
-        $lead->completedOn = $this->request->getPost("completed_on");
-        
+        $lead->square_footage = $this->request->getPost("square_footage");
 
         if (!$lead->save()) {
 
@@ -206,7 +205,7 @@ class LeadsController extends ControllerBase
             return;
         }
 
-        $this->flash->success("lead was updated successfully");
+        $this->flash->success("Lead was updated successfully");
 
         $this->dispatcher->forward([
             'controller' => "leads",
@@ -223,7 +222,7 @@ class LeadsController extends ControllerBase
     {
         $lead = Leads::findFirstByid($id);
         if (!$lead) {
-            $this->flash->error("lead was not found");
+            $this->flash->error("Lead was not found");
 
             $this->dispatcher->forward([
                 'controller' => "leads",
@@ -272,7 +271,8 @@ class LeadsController extends ControllerBase
       $lead->last_name = $this->request->getPost("last_name");
       $lead->email_address = $this->request->getPost("email_address");
       $lead->phone = $this->request->getPost("phone");
-      $lead->address = $this->request->getPost("address");
+      $lead->address = nl2br($this->request->getPost("address"));
+      $lead->completed_on = $this->created_on = date("Y-m-d H:i:s");
       //make sure square footage has some value even if blank or not a number
       if($this->request->getPost("square_footage") > 0) {
         $lead->square_footage = $this->request->getPost("square_footage");

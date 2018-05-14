@@ -69,6 +69,13 @@ class Leads extends \Phalcon\Mvc\Model
     public $completed_on;
 
     /**
+     *
+     * @var string
+     * @Column(column="session_id", type="string", nullable=true)
+     */
+    public $session_id;
+
+    /**
      * Initialize method for model.
      */
     public function initialize()
@@ -93,6 +100,7 @@ class Leads extends \Phalcon\Mvc\Model
     public function beforeCreate()
     {
         $this->created_on = date("Y-m-d H:i:s");
+        $this->session_id = $this->getDI()->getSession()->get('session-id');
     }
 
     /**
