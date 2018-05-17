@@ -79,6 +79,7 @@ class LeadsController extends ControllerBase
         if (!$this->request->isPost()) {
 
             $lead = Leads::findFirstByid($id);
+
             if (!$lead) {
                 $this->flash->error("Lead was not found");
 
@@ -254,10 +255,16 @@ class LeadsController extends ControllerBase
         ]);
     }
 
+    /**
+     * Landing page
+     * Registration flow
+     *
+     */
     public function registerAction()
     {
 
       if (!$this->request->isPost()) {
+
         $this->dispatcher->forward([
           'controller' => "index",
           'action' => 'index'
@@ -265,15 +272,20 @@ class LeadsController extends ControllerBase
 
         return;
       }
-
-      $lead = new Leads();
+      //load lead if we had a partial capture
+      if($this->request->getPost("session_id") != '') {
+        $lead = Leads::findFirst("session_id = '" . $this->request->getPost("session_id") . "'");
+      }
+      else {
+        $lead = new Leads();
+      }
       $lead->first_name = $this->request->getPost("first_name");
       $lead->last_name = $this->request->getPost("last_name");
       $lead->email_address = $this->request->getPost("email_address");
       $lead->phone = $this->request->getPost("phone");
       $lead->address = nl2br($this->request->getPost("address"));
       $lead->completed_on = $this->created_on = date("Y-m-d H:i:s");
-      //make sure square footage has some value even if blank or not a number
+      //Let's make sure square footage has some value even if blank or not a number
       if($this->request->getPost("square_footage") > 0) {
         $lead->square_footage = $this->request->getPost("square_footage");
       }
@@ -289,11 +301,66 @@ class LeadsController extends ControllerBase
         return;
       }
 
+      //Destroy the session now in case we start over!
+      $this->session->destroy();
+
       $this->flash->success("Thank you!");
       $this->response->redirect('/success');
       $this->view->disable();
 
       return;
+
+    }
+
+    /**
+     * Ajax listener
+     *
+     */
+    public function ajaxRegisterAction() {
+
+      if (!$this->request->isPost() || !$this->request->isAjax()) {
+
+        $this->dispatcher->forward([
+          'controller' => "index",
+          'action' => 'index'
+        ]);
+
+        return;
+      }
+
+      $this->view->disable();
+      $data = $this->request->getJsonRawBody();
+      $field = $data->field;
+
+      if ($data->session) {
+        $lead = Leads::findFirst("session_id = '" . $data->session . "'");
+        $lead->$field = $data->value;
+      }
+      else {
+        $lead = new Leads();
+        $lead->$field = $data->value;
+      }
+
+      if (!$lead->save()) {
+
+        foreach ($lead->getMessages() as $message) {
+          $this->flash->error($message);
+        }
+
+      }
+
+      //Create a new response
+      $response = new \Phalcon\Http\Response();
+
+      $resData = array(
+        'session' => $lead->session_id,
+      );
+
+      //Content of the response
+      $response->setContent(json_encode($resData));
+
+      //Return the response
+      return $response;
 
     }
 
