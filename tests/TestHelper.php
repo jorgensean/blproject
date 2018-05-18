@@ -13,7 +13,6 @@ set_include_path(
   ROOT_PATH . PATH_SEPARATOR . get_include_path()
 );
 
-// Required for phalcon/incubator
 include __DIR__ . "/../vendor/autoload.php";
 
 // Use the application autoloader to autoload the classes
@@ -31,7 +30,5 @@ $loader->register();
 $di = new FactoryDefault();
 
 Di::reset();
-
-// Add any needed services to the DI here
 
 Di::setDefault($di);
