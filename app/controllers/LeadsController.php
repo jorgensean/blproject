@@ -100,6 +100,8 @@ class LeadsController extends ControllerBase
             $this->tag->setDefault("phone", $lead->phone);
             $this->tag->setDefault("address", str_replace('<br />',"\n",$lead->address));
             $this->tag->setDefault("square_footage", $lead->square_footage);
+            $this->view->created_on = $lead->created_on;
+            $this->view->completed_on = $lead->completed_on;
 
         }
     }
@@ -189,7 +191,14 @@ class LeadsController extends ControllerBase
         $lead->email_address = $this->request->getPost("email_address");
         $lead->phone = $this->request->getPost("phone");
         $lead->address = $this->request->getPost("address");
-        $lead->square_footage = $this->request->getPost("square_footage");
+        //Let's make sure square footage has some value even if blank or not a number
+        if($this->request->getPost("square_footage") > 0) {
+          $lead->square_footage = $this->request->getPost("square_footage");
+        }
+        else {
+          $lead->square_footage = 0;
+        }
+
 
         if (!$lead->save()) {
 
